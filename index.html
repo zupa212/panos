@@ -1,0 +1,2172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PANOS — Private Crewed Superyacht Charters</title>
+
+  <!-- Google Fonts: Cormorant Garamond & Manrope -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       DESIGN TOKENS & RESET
+       ========================================================================== */
+    :root {
+      --accent: #C9A96E;
+      --accent-hover: #DFC28D;
+      --ink: #0B1622;
+      --ivory: #F4EFE6;
+      --muted: rgba(244, 239, 230, 0.72);
+      --panel: #0B121A;
+      --body-bg: #05090E;
+      
+      --glass-bg: rgba(8, 15, 22, 0.42);
+      --glass-blur: blur(18px) saturate(120%);
+      --glass-border: 1px solid rgba(244, 239, 230, 0.16);
+
+      --font-display: 'Cormorant Garamond', Garamond, 'Baskerville', 'Times New Roman', serif;
+      --font-body: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+      --margin-left: clamp(20px, 5.5vw, 80px);
+      --margin-right: clamp(20px, 10.4vw, 150px);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-snap-type: y mandatory;
+      scroll-padding-top: 0;
+      background-color: var(--body-bg);
+      color: var(--ivory);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    body {
+      position: relative;
+      background-color: var(--body-bg);
+      overflow-x: hidden;
+    }
+
+    em {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button, input, select {
+      font-family: inherit;
+    }
+
+    /* ==========================================================================
+       FIXED BACKGROUND VIDEO LAYER & THREE-WAY SCRIM
+       ========================================================================== */
+    .bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    #bgVideo {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+
+    /* Three-gradient scrim: yacht in center remains untouched */
+    .scrim {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        linear-gradient(to right, rgba(3, 8, 13, 0.78) 0%, rgba(3, 8, 13, 0.35) 32%, transparent 55%),
+        linear-gradient(to top, rgba(3, 8, 13, 0.80) 0%, transparent 38%),
+        linear-gradient(to bottom, rgba(3, 8, 13, 0.55) 0%, transparent 18%);
+    }
+
+    /* ==========================================================================
+       FIXED CHROME (z-index: 30)
+       ========================================================================== */
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 96px;
+      padding: 0 40px;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      pointer-events: auto;
+    }
+
+    .logo-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 24px;
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      border-radius: 9999px;
+      font-family: var(--font-display);
+      font-size: 21px;
+      font-weight: 500;
+      letter-spacing: 0.34em;
+      color: var(--ivory);
+      transition: border-color 0.3s ease, background 0.3s ease;
+    }
+
+    .logo-pill:hover {
+      border-color: rgba(201, 169, 110, 0.4);
+    }
+
+    .nav-center {
+      display: flex;
+      align-items: center;
+      gap: 52px;
+    }
+
+    .nav-link {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ivory);
+      transition: color 0.25s ease;
+      position: relative;
+    }
+
+    .nav-link:hover {
+      color: var(--accent);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .mode-switcher {
+      display: inline-flex;
+      align-items: center;
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      border-radius: 9999px;
+      padding: 4px;
+      gap: 3px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      transition: border-color 0.3s ease;
+    }
+
+    .mode-switcher:hover {
+      border-color: rgba(201, 169, 110, 0.35);
+    }
+
+    .mode-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      height: 36px;
+      padding: 0 16px;
+      border-radius: 9999px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+      white-space: nowrap;
+    }
+
+    .mode-btn svg {
+      flex-shrink: 0;
+    }
+
+    .mode-btn:hover {
+      color: var(--ivory);
+    }
+
+    .mode-btn.active {
+      background: var(--accent);
+      color: var(--ink);
+      box-shadow: 0 2px 14px rgba(201, 169, 110, 0.45);
+    }
+
+    .book-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 28px;
+      border-radius: 9999px;
+      background: var(--accent);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      transition: background 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+    }
+
+    .book-btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(201, 169, 110, 0.3);
+    }
+
+    /* Section Index */
+    .section-index {
+      position: fixed;
+      right: 40px;
+      top: 170px;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 22px;
+    }
+
+    .idx-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: rgba(244, 239, 230, 0.55);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      transition: color 0.3s ease;
+      cursor: pointer;
+    }
+
+    .idx-label {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      font-weight: 600;
+      color: var(--accent);
+      opacity: 0;
+      transform: translateX(-8px); /* slides in from 8px to its left */
+      transition: opacity 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+      pointer-events: none;
+    }
+
+    .idx-num {
+      transition: color 0.3s ease;
+    }
+
+    .idx-item.active .idx-num {
+      color: var(--accent);
+    }
+
+    .idx-item.active .idx-label {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .idx-item:hover {
+      color: var(--ivory);
+    }
+
+    /* ==========================================================================
+       CONTENT & FILM SECTIONS (01 - 04)
+       ========================================================================== */
+    main {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+    }
+
+    section[data-i] {
+      position: relative;
+      height: 100vh;
+      min-height: 760px;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      box-sizing: border-box;
+      /* No solid background for first 4 sections */
+    }
+
+    section#reserve {
+      scroll-snap-align: start;
+      scroll-snap-stop: normal;
+    }
+
+    /* Headlines over video */
+    .display-h1, .display-h2, .display-quote {
+      font-family: var(--font-display);
+      text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    /* ==========================================================================
+       BEAT 01: HERO
+       ========================================================================== */
+    .hero-left-group {
+      position: absolute;
+      top: clamp(140px, 22vh, 200px);
+      left: var(--margin-left);
+      width: min(540px, 80vw);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .accent-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+
+    .accent-eyebrow .rule {
+      width: 40px;
+      height: 1px;
+      background: var(--accent);
+      display: inline-block;
+    }
+
+    .hero-h1 {
+      font-size: clamp(56px, 6.7vw, 96px);
+      font-weight: 500;
+      line-height: 0.92;
+      color: var(--ivory);
+      margin-bottom: 24px;
+    }
+
+    .hero-lede {
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--ivory);
+      opacity: 0.88;
+      max-width: 400px;
+      margin-bottom: 38px;
+    }
+
+    .hero-cta-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .pill-btn-solid {
+      height: 54px;
+      padding: 0 32px;
+      border-radius: 9999px;
+      background: var(--accent);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+      cursor: pointer;
+    }
+
+    .pill-btn-solid:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(201, 169, 110, 0.35);
+    }
+
+    .pill-btn-glass {
+      height: 54px;
+      padding: 0 24px 0 28px;
+      border-radius: 9999px;
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      color: var(--ivory);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      transition: background 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+      cursor: pointer;
+    }
+
+    .pill-btn-glass:hover {
+      background: rgba(14, 25, 36, 0.6);
+      border-color: rgba(244, 239, 230, 0.35);
+      transform: translateY(-2px);
+    }
+
+    .arrow-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(244, 239, 230, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ivory);
+    }
+
+    /* Featured Charter Glass Card Bottom-Right */
+    .hero-card-bottom {
+      position: absolute;
+      bottom: 56px;
+      right: var(--margin-right);
+      width: 380px;
+      border-radius: 24px;
+      padding: 28px;
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    }
+
+    .hero-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .hero-card-sub {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .hero-card-title {
+      font-family: var(--font-display);
+      font-size: 30px;
+      font-weight: 500;
+      line-height: 1;
+      color: var(--ivory);
+    }
+
+    .hero-card-spec {
+      font-family: var(--font-display);
+      font-size: 64px;
+      font-weight: 500;
+      line-height: 0.85;
+      color: var(--ivory);
+    }
+
+    .hero-card-spec span {
+      font-size: 26px;
+    }
+
+    .track-bar {
+      width: 100%;
+      height: 3px;
+      background: rgba(244, 239, 230, 0.16);
+      border-radius: 2px;
+      margin: 20px 0 12px;
+      overflow: hidden;
+    }
+
+    .track-fill {
+      width: 72%;
+      height: 100%;
+      background: var(--accent);
+    }
+
+    .hero-card-status {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    .hero-card-hairline {
+      border-top: 1px solid rgba(244, 239, 230, 0.14);
+      padding-top: 18px;
+    }
+
+    .hero-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-val {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--ivory);
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+
+    .stat-lbl {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* Scroll Cue */
+    .scroll-cue {
+      position: absolute;
+      bottom: 56px;
+      left: var(--margin-left);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 5;
+    }
+
+    .scroll-cue-text {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .scroll-cue-line {
+      width: 1px;
+      height: 40px;
+      background: rgba(244, 239, 230, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .scroll-cue-runner {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, transparent, var(--accent), transparent);
+      animation: scrollCueAnim 2.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+    }
+
+    @keyframes scrollCueAnim {
+      0% { transform: translateY(-100%); }
+      60%, 100% { transform: translateY(100%); }
+    }
+
+    /* Hero Load-in Animations */
+    @keyframes heroLoadIn {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .ld1 {
+      opacity: 0;
+      animation: heroLoadIn 1.15s cubic-bezier(0.2, 0.7, 0.2, 1) 0.15s forwards;
+    }
+    .ld2 {
+      opacity: 0;
+      animation: heroLoadIn 1.15s cubic-bezier(0.2, 0.7, 0.2, 1) 0.35s forwards;
+    }
+    .ld3 {
+      opacity: 0;
+      animation: heroLoadIn 1.15s cubic-bezier(0.2, 0.7, 0.2, 1) 0.55s forwards;
+    }
+    .ld4 {
+      opacity: 0;
+      animation: heroLoadIn 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) 0.8s forwards;
+    }
+
+    /* ==========================================================================
+       BEAT 02: ONBOARD
+       ========================================================================== */
+    .onboard-card {
+      position: absolute;
+      width: clamp(220px, 20vw, 290px);
+      aspect-ratio: 29/22;
+      border-radius: 28px;
+      border: 1px solid rgba(244, 239, 230, 0.18);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    /* Staggered positioning around yacht hull */
+    .card-pos-1 {
+      left: var(--margin-left);
+      top: 14.5%;
+    }
+
+    .card-pos-2 {
+      left: calc(var(--margin-left) + 8.5vw);
+      top: 44.5%;
+    }
+
+    .card-pos-3 {
+      right: var(--margin-right);
+      top: 14.5%;
+    }
+
+    .card-pos-4 {
+      right: calc(var(--margin-right) + 8.5vw);
+      top: 44.5%;
+    }
+
+    .card-img-wrapper {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    .card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+
+    .onboard-card:hover .card-img {
+      transform: scale(1.06);
+    }
+
+    .card-scrim {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(3, 8, 13, 0.82) 0%, rgba(3, 8, 13, 0.35) 45%, transparent 75%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .card-label {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      z-index: 2;
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 500;
+      line-height: 1.05;
+      color: var(--ivory);
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+    }
+
+    .card-arrow-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ivory);
+      z-index: 2;
+      transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .onboard-card:hover .card-arrow-btn {
+      transform: scale(1.08) translate(2px, -2px);
+      background: rgba(14, 25, 36, 0.7);
+      border-color: rgba(201, 169, 110, 0.4);
+    }
+
+    /* Bottom-centre title */
+    .onboard-bottom-title {
+      position: absolute;
+      bottom: 9%;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      width: min(90%, 600px);
+      pointer-events: auto;
+    }
+
+    .onboard-heading {
+      font-size: clamp(64px, 7.2vw, 104px);
+      font-weight: 500;
+      line-height: 0.95;
+      color: var(--ivory);
+      margin-bottom: 16px;
+    }
+
+    .onboard-desc {
+      font-size: 17px;
+      line-height: 1.6;
+      color: var(--ivory);
+      opacity: 0.88;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    /* ==========================================================================
+       BEAT 03: THE VOYAGE
+       ========================================================================== */
+    .voyage-left-group {
+      position: absolute;
+      bottom: 96px;
+      left: var(--margin-left);
+      width: min(760px, 56vw);
+    }
+
+    .voyage-line {
+      width: 64px;
+      height: 2px;
+      background: var(--accent);
+      margin-bottom: 24px;
+      transform-origin: left;
+    }
+
+    .voyage-h2 {
+      font-size: clamp(52px, 5.7vw, 82px);
+      font-weight: 500;
+      line-height: 1.02;
+      color: var(--ivory);
+    }
+
+    .voyage-right-group {
+      position: absolute;
+      bottom: 104px;
+      right: var(--margin-right);
+      width: min(400px, 30vw);
+    }
+
+    .voyage-desc {
+      font-size: 16px;
+      line-height: 1.65;
+      color: var(--muted);
+      margin-bottom: 26px;
+    }
+
+    .accent-arrow-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      transition: transform 0.25s ease, color 0.25s ease;
+    }
+
+    .accent-arrow-link:hover {
+      transform: translateX(4px);
+      color: var(--accent-hover);
+    }
+
+    /* ==========================================================================
+       BEAT 04: DESTINATIONS
+       ========================================================================== */
+    .destinations-header {
+      position: absolute;
+      top: 150px;
+      left: var(--margin-left);
+    }
+
+    .dest-eyebrow {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .dest-h2 {
+      font-size: clamp(50px, 5.3vw, 76px);
+      font-weight: 500;
+      line-height: 1.0;
+      color: var(--ivory);
+    }
+
+    .destinations-grid {
+      position: absolute;
+      bottom: 64px;
+      left: var(--margin-left);
+      right: var(--margin-right);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .dest-tile {
+      min-height: 170px;
+      border-radius: 22px;
+      padding: 24px 20px;
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: background 0.35s ease, border-color 0.35s ease, transform 0.35s ease, box-shadow 0.35s ease;
+      cursor: default;
+    }
+
+    .dest-tile:hover {
+      background: rgba(5, 9, 14, 0.75);
+      border-color: rgba(201, 169, 110, 0.4);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .dest-tile-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .dest-num {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+    }
+
+    .dest-season {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .dest-name {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 500;
+      line-height: 1.1;
+      color: var(--ivory);
+      margin: 14px 0 8px;
+    }
+
+    .dest-line {
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    /* ==========================================================================
+       BEAT 05: RESERVE & FOOTER
+       ========================================================================== */
+    .reserve-sheet {
+      position: relative;
+      margin: 0 24px;
+      padding: 80px clamp(24px, 7.2vw, 104px) 40px;
+      background: #0B121A;
+      border-radius: 32px 32px 0 0;
+      border: 1px solid rgba(244, 239, 230, 0.16);
+      border-bottom: none;
+      box-shadow: 0 -40px 80px rgba(0, 0, 0, 0.4);
+      height: auto;
+      z-index: 15;
+    }
+
+    .reserve-columns {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 72px;
+      align-items: start;
+    }
+
+    /* Left Column */
+    .booking-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      background: rgba(201, 169, 110, 0.12);
+      border: 1px solid rgba(201, 169, 110, 0.28);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+
+    .booking-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    .reserve-blockquote {
+      font-size: clamp(44px, 4.4vw, 64px);
+      font-weight: 500;
+      line-height: 1.08;
+      color: var(--ivory);
+      margin-bottom: 24px;
+    }
+
+    .reserve-lede {
+      font-size: 16px;
+      line-height: 1.65;
+      color: var(--muted);
+      max-width: 480px;
+    }
+
+    /* Right Column / Quote Form */
+    .form-card {
+      background: rgba(18, 27, 37, 0.45);
+      border: 1px solid rgba(244, 239, 230, 0.12);
+      border-radius: 24px;
+      padding: 36px 32px;
+    }
+
+    .form-heading {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--ivory);
+      margin-bottom: 26px;
+    }
+
+    .form-grid-2x2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px 16px;
+      margin-bottom: 18px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .form-input, .form-select {
+      height: 52px;
+      background: #121B25;
+      border: 1px solid rgba(244, 239, 230, 0.16);
+      border-radius: 12px;
+      padding: 0 16px;
+      color: var(--ivory);
+      font-size: 14px;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+      outline: none;
+      width: 100%;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .form-select {
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23C9A96E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 40px;
+      cursor: pointer;
+    }
+
+    .form-select option {
+      background: #121B25;
+      color: var(--ivory);
+    }
+
+    .form-email-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .form-email-row .form-input {
+      flex: 1;
+    }
+
+    .submit-btn {
+      height: 52px;
+      padding: 0 28px;
+      background: var(--accent);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+    }
+
+    .submit-btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 18px rgba(201, 169, 110, 0.35);
+    }
+
+    .form-privacy {
+      font-size: 12px;
+      line-height: 1.5;
+      color: rgba(244, 239, 230, 0.5);
+    }
+
+    .form-status {
+      display: none;
+      margin-top: 16px;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    /* Footer Inside Same Panel */
+    .footer-divider {
+      margin-top: 88px;
+      padding-top: 60px;
+      border-top: 1px solid rgba(244, 239, 230, 0.14);
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 60px;
+    }
+
+    .footer-brand {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .brand-mark-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .star-icon {
+      color: var(--accent);
+    }
+
+    .footer-brand-title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 500;
+      letter-spacing: 0.28em;
+      color: var(--ivory);
+    }
+
+    .footer-brand-desc {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--muted);
+      max-width: 340px;
+    }
+
+    .footer-col-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .footer-links a, .footer-links span {
+      font-size: 14px;
+      color: var(--muted);
+      transition: color 0.2s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--ivory);
+    }
+
+    /* Giant Serif Wordmark */
+    .giant-wordmark {
+      font-family: var(--font-display);
+      font-size: clamp(90px, 17vw, 250px);
+      font-weight: 500;
+      line-height: 0.85;
+      text-align: center;
+      letter-spacing: 0.18em;
+      color: rgba(244, 239, 230, 0.05);
+      user-select: none;
+      pointer-events: none;
+      margin: 60px 0 30px;
+    }
+
+    /* Legal row */
+    .legal-row {
+      border-top: 1px solid rgba(244, 239, 230, 0.08);
+      padding-top: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: rgba(244, 239, 230, 0.5);
+    }
+
+    .legal-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .legal-links a:hover {
+      color: var(--ivory);
+    }
+
+    /* ==========================================================================
+       NATIVE CSS SCROLL-DRIVEN ANIMATIONS
+       ========================================================================== */
+    @keyframes riseFadeInAnim {
+      from {
+        opacity: 0;
+        transform: translateY(70px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes flyInLeftAnim {
+      from {
+        opacity: 0;
+        transform: translateX(-120px) scale(0.92);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+    }
+
+    @keyframes flyInRightAnim {
+      from {
+        opacity: 0;
+        transform: translateX(120px) scale(0.92);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+    }
+
+    @keyframes scaleLineXAnim {
+      from {
+        transform: scaleX(0);
+      }
+      to {
+        transform: scaleX(1);
+      }
+    }
+
+    @keyframes heroScrollExitAnim {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(-90px);
+      }
+    }
+
+    @supports (animation-timeline: view()) {
+      .rv {
+        animation: riseFadeInAnim linear both;
+        animation-timeline: view();
+        animation-range: entry 15% cover 45%;
+      }
+      .rv2 {
+        animation: riseFadeInAnim linear both;
+        animation-timeline: view();
+        animation-range: entry 25% cover 52%;
+      }
+      .rv3 {
+        animation: riseFadeInAnim linear both;
+        animation-timeline: view();
+        animation-range: entry 32% cover 58%;
+      }
+      .rv4 {
+        animation: riseFadeInAnim linear both;
+        animation-timeline: view();
+        animation-range: entry 38% cover 64%;
+      }
+
+      .inl {
+        animation: flyInLeftAnim linear both;
+        animation-timeline: view();
+        animation-range: entry 10% cover 42%;
+      }
+      .inl2 {
+        animation: flyInLeftAnim linear both;
+        animation-timeline: view();
+        animation-range: entry 18% cover 50%;
+      }
+      .inr {
+        animation: flyInRightAnim linear both;
+        animation-timeline: view();
+        animation-range: entry 14% cover 46%;
+      }
+      .inr2 {
+        animation: flyInRightAnim linear both;
+        animation-timeline: view();
+        animation-range: entry 22% cover 56%;
+      }
+
+      .line {
+        transform-origin: left;
+        animation: scaleLineXAnim linear both;
+        animation-timeline: view();
+        animation-range: entry 20% cover 48%;
+      }
+
+      .hero-exit-group {
+        animation: heroScrollExitAnim linear both;
+        animation-timeline: scroll(root);
+        animation-range: 0px 520px;
+      }
+    }
+
+    /* Fallback for browsers without animation-timeline: view() */
+    html.no-sda .rv,
+    html.no-sda .rv2,
+    html.no-sda .rv3,
+    html.no-sda .rv4 {
+      opacity: 0;
+      transform: translateY(70px);
+      transition: opacity 1.0s cubic-bezier(0.2, 0.7, 0.2, 1), transform 1.1s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    html.no-sda .rv2 { transition-delay: 0.15s; }
+    html.no-sda .rv3 { transition-delay: 0.3s; }
+    html.no-sda .rv4 { transition-delay: 0.45s; }
+
+    html.no-sda .inl,
+    html.no-sda .inl2 {
+      opacity: 0;
+      transform: translateX(-120px) scale(0.92);
+      transition: opacity 1.0s cubic-bezier(0.2, 0.7, 0.2, 1), transform 1.1s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    html.no-sda .inl2 { transition-delay: 0.2s; }
+
+    html.no-sda .inr,
+    html.no-sda .inr2 {
+      opacity: 0;
+      transform: translateX(120px) scale(0.92);
+      transition: opacity 1.0s cubic-bezier(0.2, 0.7, 0.2, 1), transform 1.1s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    html.no-sda .inr2 { transition-delay: 0.2s; }
+
+    html.no-sda .line {
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 1.0s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+
+    html.no-sda .rv.in,
+    html.no-sda .rv2.in,
+    html.no-sda .rv3.in,
+    html.no-sda .rv4.in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    html.no-sda .inl.in,
+    html.no-sda .inl2.in,
+    html.no-sda .inr.in,
+    html.no-sda .inr2.in {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+
+    html.no-sda .line.in {
+      transform: scaleX(1);
+    }
+
+    /* ==========================================================================
+       RESPONSIVE (≤ 900px)
+       ========================================================================== */
+    @media (max-width: 900px) {
+      html {
+        scroll-snap-type: none !important;
+      }
+
+      /* Hide header navigation links and section index */
+      .nav-center,
+      .section-index {
+        display: none !important;
+      }
+
+      .header {
+        padding: 0 20px;
+        height: 80px;
+      }
+
+      :root {
+        --margin-left: 20px;
+        --margin-right: 20px;
+      }
+
+      /* Sections become auto-height (min 100vh) flex columns with 120px top padding, content pushed to bottom */
+      section[data-i] {
+        height: auto !important;
+        min-height: 100vh !important;
+        padding: 120px 20px 48px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-end !important;
+        position: relative !important;
+        box-sizing: border-box !important;
+        gap: 36px;
+      }
+
+      /* Normal flow for absolutely positioned groups */
+      .hero-left-group,
+      .hero-card-bottom,
+      .scroll-cue,
+      .onboard-bottom-title,
+      .voyage-left-group,
+      .voyage-right-group,
+      .destinations-header,
+      .destinations-grid {
+        position: static !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        transform: none !important;
+        top: auto !important;
+        bottom: auto !important;
+        left: auto !important;
+        right: auto !important;
+      }
+
+      .hero-card-bottom {
+        margin-top: 20px;
+      }
+
+      /* Onboard becomes a 2-column grid of cards with "Made to glide" above them, left-aligned */
+      .onboard-container {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        gap: 32px;
+      }
+
+      .onboard-bottom-title {
+        order: 1 !important;
+        text-align: left !important;
+      }
+
+      .onboard-cards-wrapper {
+        order: 2 !important;
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px !important;
+        width: 100% !important;
+      }
+
+      .onboard-card {
+        position: static !important;
+        width: 100% !important;
+        aspect-ratio: 29/22 !important;
+        transform: none !important;
+      }
+
+      /* Destinations tiles go to 1 column */
+      .destinations-grid {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+      }
+
+      /* Reserve sheet and form go to 1 column */
+      .reserve-sheet {
+        margin: 0 !important;
+        border-radius: 24px 24px 0 0 !important;
+        padding: 60px 20px 32px !important;
+      }
+
+      .reserve-columns {
+        grid-template-columns: 1fr !important;
+        gap: 40px !important;
+      }
+
+      .form-grid-2x2 {
+        grid-template-columns: 1fr !important;
+      }
+
+      .form-email-row {
+        flex-direction: column !important;
+      }
+
+      .submit-btn {
+        width: 100% !important;
+      }
+
+      /* Footer 1 column */
+      .footer-grid {
+        grid-template-columns: 1fr !important;
+        gap: 36px !important;
+      }
+
+      .legal-row {
+        flex-direction: column !important;
+        gap: 16px !important;
+        align-items: flex-start !important;
+      }
+    }
+
+    @media (max-width: 540px) {
+      .onboard-cards-wrapper {
+        grid-template-columns: 1fr !important;
+      }
+      .hero-stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px !important;
+      }
+      .hero-cta-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .pill-btn-solid, .pill-btn-glass {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    /* ==========================================================================
+       PREFERS-REDUCED-MOTION
+       ========================================================================== */
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto !important;
+      }
+
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      .ld1, .ld2, .ld3, .ld4 {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+
+      .rv, .rv2, .rv3, .rv4, .inl, .inl2, .inr, .inr2, .line, .hero-exit-group {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+
+      .scroll-cue-runner {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       MEDIA LAYER: FIXED VIDEO & THREE-WAY SCRIM
+       ========================================================================== -->
+  <div class="bg" aria-hidden="true">
+    <video id="bgVideo" autoplay muted loop playsinline preload="auto"
+      poster="https://thinkingods.com/demos/veloria-yacht/assets/yacht-poster.jpg">
+      <source src="https://thinkingods.com/demos/veloria-yacht/assets/yacht.mp4" type="video/mp4">
+      <source src="yacht.mp4" type="video/mp4">
+    </video>
+    <div class="scrim"></div>
+  </div>
+
+  <!-- ==========================================================================
+       FIXED CHROME (z-index: 30)
+       ========================================================================== -->
+  <header class="header">
+    <a href="#hero" class="logo-pill" aria-label="Panos Home">PANOS</a>
+
+    <nav class="nav-center" aria-label="Main Navigation">
+      <a href="#onboard" class="nav-link">ONBOARD</a>
+      <a href="#voyage" class="nav-link">THE VOYAGE</a>
+      <a href="#destinations" class="nav-link">DESTINATIONS</a>
+      <a href="#reserve" class="nav-link">RESERVE</a>
+    </nav>
+
+    <div class="header-right">
+      <!-- Mode Switcher: Loop / Scrub -->
+      <div class="mode-switcher" role="group" aria-label="Video Playback Mode">
+        <button type="button" class="mode-btn active" id="btnModeLoop" data-mode="loop" title="Continuous video loop">
+          <svg class="mode-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="17 1 21 5 17 9"></polyline>
+            <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+            <polyline points="7 23 3 19 7 15"></polyline>
+            <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+          </svg>
+          <span>LOOP</span>
+        </button>
+        <button type="button" class="mode-btn" id="btnModeScrub" data-mode="scrub" title="Scrub video with scroll">
+          <svg class="mode-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="21" x2="4" y2="14"></line>
+            <line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line>
+            <line x1="20" y1="12" x2="20" y2="3"></line>
+            <circle cx="4" cy="12" r="2"></circle>
+            <circle cx="12" cy="10" r="2"></circle>
+            <circle cx="20" cy="14" r="2"></circle>
+          </svg>
+          <span>SCRUB</span>
+        </button>
+      </div>
+
+      <a href="#reserve" class="book-btn">BOOK A CHARTER</a>
+    </div>
+  </header>
+
+  <!-- Section Index (Fixed Right) -->
+  <nav class="section-index" aria-label="Section Index">
+    <a href="#hero" class="idx-item active" data-target="01">
+      <span class="idx-label">HOME</span>
+      <span class="idx-num">01</span>
+    </a>
+    <a href="#onboard" class="idx-item" data-target="02">
+      <span class="idx-label">ONBOARD</span>
+      <span class="idx-num">02</span>
+    </a>
+    <a href="#voyage" class="idx-item" data-target="03">
+      <span class="idx-label">VOYAGE</span>
+      <span class="idx-num">03</span>
+    </a>
+    <a href="#destinations" class="idx-item" data-target="04">
+      <span class="idx-label">DESTINATIONS</span>
+      <span class="idx-num">04</span>
+    </a>
+    <a href="#reserve" class="idx-item" data-target="05">
+      <span class="idx-label">RESERVE</span>
+      <span class="idx-num">05</span>
+    </a>
+  </nav>
+
+  <!-- ==========================================================================
+       MAIN CONTENT CONTAINER
+       ========================================================================== -->
+  <main>
+
+    <!-- ----------------------------------------------------------------------
+         01 HERO
+         ---------------------------------------------------------------------- -->
+    <section id="hero" data-i="01" aria-label="Hero Section">
+      <div class="hero-left-group hero-exit-group">
+        <div class="accent-eyebrow ld1">
+          <span class="rule" aria-hidden="true"></span>
+          <span>PRIVATE CREWED CHARTERS</span>
+        </div>
+
+        <h1 class="display-h1 hero-h1 ld1">
+          The open sea, <em>reserved</em> for you.
+        </h1>
+
+        <p class="hero-lede ld2">
+          Crewed superyachts across the Mediterranean and the Indian Ocean. Choose the yacht, set the course, and every nautical mile is handled.
+        </p>
+
+        <div class="hero-cta-group ld3">
+          <a href="#reserve" class="pill-btn-solid">RESERVE A CHARTER</a>
+          <a href="#onboard" class="pill-btn-glass">
+            <span>STEP ABOARD</span>
+            <span class="arrow-circle" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5v14M19 12l-7 7-7-7"/>
+              </svg>
+            </span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Featured Charter Stat Card Bottom-Right -->
+      <div class="hero-card-bottom ld4 hero-exit-group">
+        <div class="hero-card-head">
+          <div>
+            <div class="hero-card-sub">FEATURED CHARTER</div>
+            <div class="hero-card-title">Aurelle</div>
+          </div>
+          <div class="hero-card-spec">38<span>m</span></div>
+        </div>
+
+        <div class="track-bar" aria-hidden="true">
+          <div class="track-fill"></div>
+        </div>
+
+        <div class="hero-card-status">SUMMER DATES FILLING · AMALFI COAST</div>
+
+        <div class="hero-card-hairline">
+          <div class="hero-stats-grid">
+            <div class="stat-item">
+              <span class="stat-val">10</span>
+              <span class="stat-lbl">Guests</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-val">5</span>
+              <span class="stat-lbl">Cabins</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-val">7</span>
+              <span class="stat-lbl">Crew</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-val">[PRICE]</span>
+              <span class="stat-lbl">Per day</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom-Left Scroll Cue -->
+      <div class="scroll-cue ld3 hero-exit-group">
+        <span class="scroll-cue-text">SCROLL TO SET SAIL</span>
+        <div class="scroll-cue-line" aria-hidden="true">
+          <div class="scroll-cue-runner"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------------------------
+         02 ONBOARD
+         ---------------------------------------------------------------------- -->
+    <section id="onboard" data-i="02" aria-label="Onboard Experience">
+      <div class="onboard-container">
+        <!-- Four Floating Corner Cards -->
+        <div class="onboard-cards-wrapper">
+          <!-- Card 1: Swim platform -->
+          <article class="onboard-card card-pos-1 inl">
+            <div class="card-img-wrapper">
+              <img src="https://thinkingods.com/demos/veloria-yacht/assets/t1.jpg" alt="Panos superyacht swim platform level with crystal Mediterranean waters" class="card-img" loading="lazy">
+            </div>
+            <div class="card-scrim" aria-hidden="true"></div>
+            <h3 class="card-label">Swim<br>platform</h3>
+            <div class="card-arrow-btn" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="7" y1="17" x2="17" y2="7"></line>
+                <polyline points="7 7 17 7 17 17"></polyline>
+              </svg>
+            </div>
+          </article>
+
+          <!-- Card 2: Sun deck -->
+          <article class="onboard-card card-pos-2 inl2">
+            <div class="card-img-wrapper">
+              <img src="https://thinkingods.com/demos/veloria-yacht/assets/t2.jpg" alt="Expansive teak sun deck with custom lounge daybeds" class="card-img" loading="lazy">
+            </div>
+            <div class="card-scrim" aria-hidden="true"></div>
+            <h3 class="card-label">Sun<br>deck</h3>
+            <div class="card-arrow-btn" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="7" y1="17" x2="17" y2="7"></line>
+                <polyline points="7 7 17 7 17 17"></polyline>
+              </svg>
+            </div>
+          </article>
+
+          <!-- Card 3: Silent hull -->
+          <article class="onboard-card card-pos-3 inr">
+            <div class="card-img-wrapper">
+              <img src="https://thinkingods.com/demos/veloria-yacht/assets/t3.jpg" alt="Hydrodynamic silent composite hull navigating coastal waters" class="card-img" loading="lazy">
+            </div>
+            <div class="card-scrim" aria-hidden="true"></div>
+            <h3 class="card-label">Silent<br>hull</h3>
+            <div class="card-arrow-btn" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="7" y1="17" x2="17" y2="7"></line>
+                <polyline points="7 7 17 7 17 17"></polyline>
+              </svg>
+            </div>
+          </article>
+
+          <!-- Card 4: Golden hour runs -->
+          <article class="onboard-card card-pos-4 inr2">
+            <div class="card-img-wrapper">
+              <img src="https://thinkingods.com/demos/veloria-yacht/assets/t4.jpg" alt="Golden hour ocean run under glowing sunset skies" class="card-img" loading="lazy">
+            </div>
+            <div class="card-scrim" aria-hidden="true"></div>
+            <h3 class="card-label">Golden<br>hour runs</h3>
+            <div class="card-arrow-btn" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="7" y1="17" x2="17" y2="7"></line>
+                <polyline points="7 7 17 7 17 17"></polyline>
+              </svg>
+            </div>
+          </article>
+        </div>
+
+        <!-- Bottom-Centre Title -->
+        <div class="onboard-bottom-title rv">
+          <h2 class="display-h2 onboard-heading">
+            Made to <em>glide</em>
+          </h2>
+          <p class="onboard-desc">
+            A private chef, a full crew and every water toy aboard. The yacht runs quietly around the way you like your days.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------------------------
+         03 THE VOYAGE
+         ---------------------------------------------------------------------- -->
+    <section id="voyage" data-i="03" aria-label="The Voyage">
+      <div class="voyage-left-group rv">
+        <div class="voyage-line line" aria-hidden="true"></div>
+        <h2 class="display-h2 voyage-h2">
+          Charter the coastline <em>nobody else</em> can reach.
+        </h2>
+      </div>
+
+      <div class="voyage-right-group rv2">
+        <p class="voyage-desc">
+          Your captain plans the route around weather, anchorages and your pace. Quiet coves at dawn, a harbour dinner at dusk, and open water in between.
+        </p>
+        <a href="#destinations" class="accent-arrow-link">
+          <span>SEE WHERE WE SAIL</span>
+          <span aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------------------------
+         04 DESTINATIONS
+         ---------------------------------------------------------------------- -->
+    <section id="destinations" data-i="04" aria-label="Destinations">
+      <div class="destinations-header rv">
+        <div class="dest-eyebrow">WHERE WE SAIL</div>
+        <h2 class="display-h2 dest-h2">
+          Four coastlines, one <em>season</em> each.
+        </h2>
+      </div>
+
+      <div class="destinations-grid">
+        <!-- Tile 1 -->
+        <div class="dest-tile rv">
+          <div class="dest-tile-top">
+            <span class="dest-num">01</span>
+            <span class="dest-season">MAY – OCT</span>
+          </div>
+          <h3 class="dest-name">Amalfi Coast</h3>
+          <p class="dest-line">Positano at dusk, lunch anchored off Li Galli.</p>
+        </div>
+
+        <!-- Tile 2 -->
+        <div class="dest-tile rv2">
+          <div class="dest-tile-top">
+            <span class="dest-num">02</span>
+            <span class="dest-season">JUN – SEP</span>
+          </div>
+          <h3 class="dest-name">Cyclades</h3>
+          <p class="dest-line">Whitewashed harbours from Mykonos to Milos.</p>
+        </div>
+
+        <!-- Tile 3 -->
+        <div class="dest-tile rv3">
+          <div class="dest-tile-top">
+            <span class="dest-num">03</span>
+            <span class="dest-season">NOV – APR</span>
+          </div>
+          <h3 class="dest-name">Maldives</h3>
+          <p class="dest-line">Atoll to atoll, sandbank dinners after dark.</p>
+        </div>
+
+        <!-- Tile 4 -->
+        <div class="dest-tile rv4">
+          <div class="dest-tile-top">
+            <span class="dest-num">04</span>
+            <span class="dest-season">NOV – MAY</span>
+          </div>
+          <h3 class="dest-name">Andaman Islands</h3>
+          <p class="dest-line">Quiet anchorages off Havelock and Neil.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------------------------
+         05 RESERVE & FOOTER (Solid Sheet)
+         ---------------------------------------------------------------------- -->
+    <section id="reserve" data-i="05" class="reserve-sheet" aria-label="Charter Reservation">
+      <div class="reserve-columns">
+        <!-- Left Column -->
+        <div>
+          <div class="booking-pill">
+            <span class="booking-dot" aria-hidden="true"></span>
+            <span>NOW BOOKING THE SEASON</span>
+          </div>
+
+          <blockquote class="display-quote reserve-blockquote">
+            You don't rent a yacht. You borrow the <em>horizon</em>.
+          </blockquote>
+
+          <p class="reserve-lede">
+            Tell us where, when and who. A charter manager replies within [RESPONSE TIME] with yacht options, a route and an all-in quote.
+          </p>
+        </div>
+
+        <!-- Right Column: Form -->
+        <div class="form-card">
+          <h3 class="form-heading">REQUEST A CHARTER QUOTE</h3>
+
+          <form id="quoteForm">
+            <div class="form-grid-2x2">
+              <!-- Destination -->
+              <div class="form-field">
+                <label for="destSelect" class="form-label">DESTINATION</label>
+                <select id="destSelect" class="form-select" required>
+                  <option value="" disabled selected>Select coastline</option>
+                  <option value="Amalfi Coast">Amalfi Coast</option>
+                  <option value="Cyclades">Cyclades</option>
+                  <option value="Maldives">Maldives</option>
+                  <option value="Andaman Islands">Andaman Islands</option>
+                  <option value="Not sure yet">Not sure yet</option>
+                </select>
+              </div>
+
+              <!-- Yacht -->
+              <div class="form-field">
+                <label for="yachtSelect" class="form-label">YACHT</label>
+                <select id="yachtSelect" class="form-select" required>
+                  <option value="Aurelle · 38 m" selected>Aurelle · 38 m</option>
+                  <option value="Any motor yacht">Any motor yacht</option>
+                  <option value="Any sailing yacht">Any sailing yacht</option>
+                </select>
+              </div>
+
+              <!-- Dates -->
+              <div class="form-field">
+                <label for="datesInput" class="form-label">DATES</label>
+                <input type="text" id="datesInput" class="form-input" placeholder="e.g. 12–19 June" required>
+              </div>
+
+              <!-- Guests -->
+              <div class="form-field">
+                <label for="guestsSelect" class="form-label">GUESTS</label>
+                <select id="guestsSelect" class="form-select" required>
+                  <option value="2">2 Guests</option>
+                  <option value="4">4 Guests</option>
+                  <option value="6">6 Guests</option>
+                  <option value="8">8 Guests</option>
+                  <option value="10" selected>10 Guests</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Email & Submit Row -->
+            <div class="form-email-row">
+              <input type="email" id="emailInput" class="form-input" placeholder="Enter your email address" required>
+              <button type="submit" class="submit-btn">Get my quote</button>
+            </div>
+
+            <p class="form-privacy">
+              Discretion guaranteed. We never share client itineraries or personal information.
+            </p>
+
+            <div id="formStatus" class="form-status" role="alert">
+              Thank you. A charter manager will be in touch.
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Footer Inside The Same Panel -->
+      <footer class="footer-divider">
+        <div class="footer-grid">
+          <!-- Brand Column -->
+          <div class="footer-brand">
+            <div class="brand-mark-row">
+              <svg class="star-icon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0L14.8 9.2L24 12L14.8 14.8L12 24L9.2 14.8L0 12L9.2 9.2L12 0Z"/>
+              </svg>
+              <span class="footer-brand-title">PANOS</span>
+            </div>
+            <p class="footer-brand-desc">
+              Bespoke crewed superyacht charters engineered around stillness, precision, and secluded waters.
+            </p>
+          </div>
+
+          <!-- Charter Column -->
+          <div>
+            <div class="footer-col-title">CHARTER</div>
+            <ul class="footer-links">
+              <li><a href="#hero">Fleet Overview</a></li>
+              <li><a href="#destinations">Amalfi Coast</a></li>
+              <li><a href="#destinations">Cyclades</a></li>
+              <li><a href="#destinations">Maldives</a></li>
+              <li><a href="#destinations">Andaman Islands</a></li>
+            </ul>
+          </div>
+
+          <!-- Company Column -->
+          <div>
+            <div class="footer-col-title">COMPANY</div>
+            <ul class="footer-links">
+              <li><a href="#voyage">About Panos</a></li>
+              <li><a href="#onboard">Crew & Standards</a></li>
+              <li><a href="#voyage">Sustainability</a></li>
+              <li><a href="#reserve">Press & Enquiries</a></li>
+            </ul>
+          </div>
+
+          <!-- Contact Column -->
+          <div>
+            <div class="footer-col-title">CONTACT</div>
+            <ul class="footer-links">
+              <li><span>[EMAIL ADDRESS]</span></li>
+              <li><span>[PHONE NUMBER]</span></li>
+              <li><a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a></li>
+              <li><a href="https://youtube.com" target="_blank" rel="noopener">YouTube</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Giant Serif Wordmark -->
+        <div class="giant-wordmark" aria-hidden="true">PANOS</div>
+
+        <!-- Legal Row -->
+        <div class="legal-row">
+          <div>&copy; 2026 Panos Yacht Charters. All rights reserved.</div>
+          <div class="legal-links">
+            <a href="#privacy">Privacy</a>
+            <a href="#terms">Terms</a>
+          </div>
+        </div>
+      </footer>
+    </section>
+
+  </main>
+
+  <!-- ==========================================================================
+       SCRIPTS: VIDEO CONTROLLER, SCROLL LOGIC, INDEX OBSERVER & FALLBACKS
+       ========================================================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      // 1. VIDEO MODE HANDLING & INTERACTIVE BUTTON SWITCHER
+      let currentVideoMode = new URLSearchParams(location.search).get('mode') || 'loop';
+      const bgVideo = document.getElementById('bgVideo');
+      const btnModeLoop = document.getElementById('btnModeLoop');
+      const btnModeScrub = document.getElementById('btnModeScrub');
+
+      let ticking = false;
+      function updateScrub() {
+        if (bgVideo && bgVideo.duration && !isNaN(bgVideo.duration)) {
+          const maxScroll = window.innerHeight * 3;
+          const progress = Math.min(1, Math.max(0, window.scrollY / maxScroll));
+          bgVideo.currentTime = progress * Math.max(0, bgVideo.duration - 0.05);
+        }
+        ticking = false;
+      }
+
+      function onScroll() {
+        if (currentVideoMode === 'scrub' && !ticking) {
+          requestAnimationFrame(updateScrub);
+          ticking = true;
+        }
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+
+      bgVideo.addEventListener('loadedmetadata', () => {
+        if (currentVideoMode === 'scrub') {
+          updateScrub();
+        }
+      });
+
+      function setVideoMode(mode, updateUrl = true) {
+        currentVideoMode = mode;
+
+        if (updateUrl) {
+          const url = new URL(window.location.href);
+          url.searchParams.set('mode', mode);
+          window.history.replaceState({}, '', url.toString());
+        }
+
+        if (mode === 'scrub') {
+          if (btnModeScrub) btnModeScrub.classList.add('active');
+          if (btnModeLoop) btnModeLoop.classList.remove('active');
+
+          bgVideo.removeAttribute('autoplay');
+          bgVideo.loop = false;
+          bgVideo.pause();
+
+          if (bgVideo.readyState >= 1) {
+            updateScrub();
+          }
+        } else {
+          // 'loop' mode
+          if (btnModeLoop) btnModeLoop.classList.add('active');
+          if (btnModeScrub) btnModeScrub.classList.remove('active');
+
+          bgVideo.loop = true;
+          const playPromise = bgVideo.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(() => {
+              const startPlayOnPointer = () => {
+                bgVideo.play();
+                window.removeEventListener('pointerdown', startPlayOnPointer);
+              };
+              window.addEventListener('pointerdown', startPlayOnPointer, { once: true });
+            });
+          }
+        }
+      }
+
+      if (btnModeLoop) {
+        btnModeLoop.addEventListener('click', () => setVideoMode('loop'));
+      }
+      if (btnModeScrub) {
+        btnModeScrub.addEventListener('click', () => setVideoMode('scrub'));
+      }
+
+      // Initialize on load
+      setVideoMode(currentVideoMode, false);
+
+      // 2. SECTION INDEX OBSERVER (threshold: 0.5)
+      const sections = document.querySelectorAll('section[data-i]');
+      const idxItems = document.querySelectorAll('.idx-item');
+
+      if ('IntersectionObserver' in window) {
+        const navObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const secId = entry.target.getAttribute('data-i');
+              idxItems.forEach(item => {
+                if (item.getAttribute('data-target') === secId) {
+                  item.classList.add('active');
+                } else {
+                  item.classList.remove('active');
+                }
+              });
+            }
+          });
+        }, {
+          threshold: 0.5
+        });
+
+        sections.forEach(s => navObserver.observe(s));
+      }
+
+      // 3. FALLBACK FOR BROWSERS WITHOUT CSS SCROLL-TIMELINE
+      const supportsScrollTimeline = window.CSS && CSS.supports && CSS.supports('animation-timeline', 'view()');
+      if (!supportsScrollTimeline) {
+        document.documentElement.classList.add('no-sda');
+
+        if ('IntersectionObserver' in window) {
+          const animObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('in');
+              }
+            });
+          }, { threshold: 0.2 });
+
+          document.querySelectorAll('.rv, .rv2, .rv3, .rv4, .inl, .inl2, .inr, .inr2, .line').forEach(el => {
+            animObserver.observe(el);
+          });
+        } else {
+          // Absolute fallback if IntersectionObserver missing
+          document.querySelectorAll('.rv, .rv2, .rv3, .rv4, .inl, .inl2, .inr, .inr2, .line').forEach(el => {
+            el.classList.add('in');
+          });
+        }
+
+        // Hero exit fallback for browsers without scroll-timeline: scroll root 0 - 520px
+        const heroExitGroups = document.querySelectorAll('.hero-exit-group');
+        window.addEventListener('scroll', () => {
+          const y = window.scrollY;
+          const progress = Math.min(1, Math.max(0, y / 520));
+          heroExitGroups.forEach(el => {
+            el.style.opacity = (1 - progress).toString();
+            el.style.transform = `translateY(${-progress * 90}px)`;
+          });
+        }, { passive: true });
+      }
+
+      // 4. QUOTE FORM SUBMISSION (No backend)
+      const quoteForm = document.getElementById('quoteForm');
+      const formStatus = document.getElementById('formStatus');
+
+      if (quoteForm && formStatus) {
+        quoteForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          formStatus.style.display = 'block';
+          quoteForm.reset();
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
